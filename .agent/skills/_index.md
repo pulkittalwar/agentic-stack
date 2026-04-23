@@ -32,3 +32,63 @@ Turns a spec into task-by-task implementation plan an engineer with zero
 codebase context can execute end-to-end.
 Triggers: "implementation plan", "break this down", "plan this feature"
 Constraints: no placeholders, code shown in every step, TDD ordering.
+
+## product-discovery (PDLC entry)
+Validates a problem before any design: named user, named status quo,
+narrow wedge, observable behavior, measurable success criteria.
+Triggers: "I have an idea", "is this worth building", "help me think through"
+Constraints: no implementation until a design is approved; no category users.
+
+## requirements-writer
+Turns a validated problem into a spec with given/when/then acceptance,
+declared scope mode (Expansion/Selective/Hold/Reduction), and non-goals.
+Triggers: "write the spec", "write requirements", "acceptance criteria"
+Constraints: no wish words; every requirement traces to a problem line.
+
+## story-decomposer
+Splits a feature into independently-shippable, vertically-sliced stories
+sized under a week with named dependencies and blast radius.
+Triggers: "break into stories", "user stories", "split this feature"
+Constraints: INVEST-compliant; no horizontal layer splits; no technical tasks.
+
+## spec-reviewer (PDLC→SDLC gate)
+Grades a spec with a 0-10 rubric + "what a 10 looks like" gap statements,
+coverage matrix, confidence-filtered gap list, explicit go/no-go verdict.
+Triggers: "review the spec", "go/no-go", "is this ready to build"
+Constraints: confidence ≥ 80 filter; no "LGTM" without evidence.
+
+## architect
+Produces system design: ASCII component diagram with typed interfaces,
+data flow with failure branches, edge-case matrix, test-seam list,
+assumption ledger.
+Triggers: "design the system", "architecture for this", "data flow"
+Constraints: no UML-for-UML's-sake; every component has a test seam.
+
+## implementer
+Executes a plan task-by-task under strict TDD (Red-Green-Refactor),
+one commit per task, fresh subagent per task when available.
+Triggers: "implement this plan", "execute the plan", "start coding"
+Constraints: Iron Law — no production code before a failing test;
+one task per commit; no silent plan edits.
+
+## test-writer
+Writes tests that would fail on regression: right pyramid layer, DAMP names,
+refactor-resilient, behavioral coverage over line coverage.
+Triggers: "write tests", "test coverage", "add regression tests"
+Constraints: every test has an assertion; no implementation coupling;
+no framework tests.
+
+## code-reviewer (pre-merge)
+Adversarial diff review with confidence ≥ 80 filter, severity tiers
+(Critical 90-100 / Important 80-89), CRITICAL checklist (SQL/LLM-trust/
+race/shell/enum). Also governs review reception — verify before
+implementing.
+Triggers: "review this code", "check my changes", "code review"
+Constraints: no LGTM without checklist; no performative agreement when receiving.
+
+## release-notes
+Translates a diff into audience-sectioned notes (users/operators/devs)
+with breaking-change upgrade paths and semver-grounded version bump.
+Triggers: "write release notes", "update the changelog", "what changed"
+Constraints: no misc-fixes bucket; every entry traces to a commit/PR;
+breaking changes carry explicit upgrade path.
