@@ -91,9 +91,39 @@ usually respects this." On a live BCG engagement, only the first claim survives
 a risk review.
 
 ### Module 5: Tools — the review surface
-<!-- TODO (Pulkit): why does graduate.py require --rationale? What failure mode
-     does this prevent? (Hint: "rubber-stamping".) How does this differ from
-     auto-promoting candidates? -->
+**The `tools/` directory is where the human operates the memory system.**
+`auto_dream.py` STAGES candidates; no code path auto-promotes. Promotion is
+always a human act.
+
+**Lesson lifecycle:**
+- `list_candidates.py` — pending candidates, sorted by priority (backlog age × salience)
+- `graduate.py <id> --rationale "..."` — promote. **`--rationale` is `required=True`**, not optional
+- `reject.py <id> --reason "..."` — reject with reason
+- `reopen.py <id>` — re-queue a previously-rejected candidate (new evidence arrived)
+- `learn.py "<rule>" --rationale "..."` — v0.8.0 one-shot stage+graduate for high-conviction rules
+
+**Visibility / recall:**
+- `recall.py "<intent>"` — surface graduated lessons relevant to a pending action (v0.8.0 "recall first" pattern)
+- `show.py` — one-screen dashboard of brain state
+- `memory_reflect.py <skill> <action> <outcome>` — log a significant event manually
+
+**Why `--rationale` is required.** Rubber-stamped promotions are the failure
+mode this layer exists to prevent. The field forces the reviewer to **prove
+generalizability** — not tag client-specificity. A good rationale has four
+parts: (1) the pattern, (2) **mechanism** (why it holds), (3) where it
+generalizes, (4) where it does NOT. The "does NOT" bound is the discipline —
+it prevents the lesson from being applied where it breaks. If writing the
+rationale is easy ("looks good" / "for client A"), the content probably isn't
+a semantic lesson — it's either a preference (→ `personal/PREFERENCES.md`) or
+a client-specific fact (→ `client/<id>/`). **Discovered patterns graduate here;
+declared rules don't.**
+
+**Contrast with auto-promotion.** `auto_dream.py` clusters episodes and stages
+candidates when `cluster_size ≥ 2` and `canonical_salience ≥ 7.0`, but stops
+there. Auto-promotion was deliberately rejected because patterns from one
+project may not generalize — the rationale field is where the human judges
+generalizability candidate-by-candidate. Phase 2 may extend this with a
+`--cross-client-safe` flag or rationale-keyword check for the DS team layer.
 
 ### Module 6: Harness — thin conductor
 <!-- TODO (Pulkit): why do Claude Code users mostly ignore conductor.py? Which
@@ -113,14 +143,18 @@ repo module by module. Established fork at github.com/pulkittalwar/agentic-stack
 Created this file using gbrain compiled-truth + timeline format. Planned 10-step
 buildout toward a PDLC-SDLC team in Claude Code (see plan file).
 
-### 2026-04-22 — Modules 1–4 filled
+### 2026-04-22 → 2026-04-23 — Modules 1–5 filled
 Filled Modules 1 (AGENTS.md as harness-agnostic map + constitution),
 2 (memory four layers — what-question + who-writes dual lens),
-3 (skills / progressive disclosure — token + cache economics), and
-4 (protocols — deterministic enforcement, architectural claim vs. advisory) via
-Socratic Q&A in Claude Code. Modules 5–7 remain TODO. v0.8.0 baseline merged
-from upstream; D1/D2/D3 locked (single fork + gitignored `memory/client/<id>/`;
-hybrid core + `adapters/bcg/`; all four deliverables — Phase 3 non-optional).
+3 (skills / progressive disclosure — token + cache economics),
+4 (protocols — deterministic enforcement, architectural claim vs. advisory),
+and 5 (tools — review surface, `--rationale` as generalizability filter,
+discovered-vs-declared test) via Socratic Q&A in Claude Code. Modules 6–7
+remain TODO. v0.8.0 baseline merged from upstream; D1/D2/D3 locked (single
+fork + gitignored `memory/client/<id>/`; hybrid core + `adapters/bcg/`; all
+four deliverables — Phase 3 non-optional). Also surveyed gstack ≥ v1.0.0.0
+— bootstrap-target note added to plan, convergence on host-adapter pattern
+noted as architectural validation.
 
 ### [future entries]
 - When something above is wrong, rewrite the compiled-truth section and add
