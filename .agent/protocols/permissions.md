@@ -33,3 +33,22 @@ invocation. Humans edit this file; the agent does not.
 - `pypi.org`
 - `api.anthropic.com`
 - `api.openai.com`
+
+## BCG engagement rules
+
+These layer on top of the generic tiers above when working on BCG
+engagements or in repositories handling client data. Remove or edit when
+leaving BCG.
+
+### Never allowed
+- Push from a BCG-client repo (remote URL contains `client-`, `bcg-`, or a
+  BCG-hosted git host) to a personal remote (e.g. `github.com/pulkittalwar/*`),
+  or vice versa. If the correct remote is ambiguous, stop and ask.
+- Write into `memory/client/<X>/` where `<X>` does not match the current
+  active client. Active client resolves in this order: (1) `AGENT_CLIENT`
+  env var, (2) nearest parent directory matching `client-*`, (3) first
+  `memory/client/<X>/` path referenced in the session.
+
+### Requires approval
+- `git push` to any remote URL not seen previously in the current session.
+  Prevents silent mistakes after `git remote add` or branch-tracking changes.
