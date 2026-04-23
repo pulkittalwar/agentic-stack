@@ -126,8 +126,34 @@ generalizability candidate-by-candidate. Phase 2 may extend this with a
 `--cross-client-safe` flag or rationale-keyword check for the DS team layer.
 
 ### Module 6: Harness — thin conductor
-<!-- TODO (Pulkit): why do Claude Code users mostly ignore conductor.py? Which
-     pieces of harness/ DO matter for Claude Code users, and why? -->
+**Claude Code IS the conductor — so `conductor.py` is ignored.** The
+standalone-Python `conductor.py` does three things: `build_context()`,
+`call_model()`, and `log_execution()`. Claude Code replaces all three
+natively — its own context loader (CLAUDE.md + skill injection + conversation
+history), its own API layer (the CLI itself), and PostToolUse hooks that call
+`log_execution()` indirectly. Same three responsibilities, different
+implementation — swap Claude Code ↔ Cursor ↔ standalone Python and reasoning
+stays intact because it lives in `skills/` + the host agent, not the conductor.
+AGENTS.md rule #8: *"The harness is dumb on purpose."*
+
+**What IS load-bearing for Claude Code users (with triggers):**
+
+| File | Triggered by |
+|---|---|
+| `hooks/claude_code_post_tool.py` | **PostToolUse hook** in `adapters/claude-code/settings.json` — fires after every Claude Code tool call (Bash, Edit, Write, etc.) |
+| `hooks/post_execution.py` | Called by `claude_code_post_tool.py` on success; also by subagents via `memory_reflect.py` |
+| `hooks/on_failure.py` | Called by `claude_code_post_tool.py` on failure (non-zero exit, stderr errors, interrupted flag) |
+| `hooks/pre_tool_call.py` | Called programmatically to gatekeep permissions; wireable as a PreToolUse hook |
+| `salience.py`, `text.py`, `hooks/_provenance.py` | Imported helpers — run whenever their callers run (`cluster`, `promote`, `recall`, the post-tool hook) |
+
+**The composability surface.** Only ONE file (`claude_code_post_tool.py`) is
+directly wired to Claude Code's event system; everything else is either
+imported by that file or invoked by subagents. This tiny wire-point is what
+makes the harness swappable: porting to Cursor / Hermes / standalone Python
+means writing one new hook binding that forwards to the same core logic. In
+Phase 2, `adapters/bcg/` will likely add a second hook binding alongside the
+core one (e.g., compliance-archive routing for `client/<id>/` writes) —
+composing, not replacing.
 
 ### The six feedback loops
 <!-- TODO (Pulkit): in your own words, what makes this system "compound" instead
@@ -143,18 +169,20 @@ repo module by module. Established fork at github.com/pulkittalwar/agentic-stack
 Created this file using gbrain compiled-truth + timeline format. Planned 10-step
 buildout toward a PDLC-SDLC team in Claude Code (see plan file).
 
-### 2026-04-22 → 2026-04-23 — Modules 1–5 filled
+### 2026-04-22 → 2026-04-23 — Modules 1–6 filled
 Filled Modules 1 (AGENTS.md as harness-agnostic map + constitution),
 2 (memory four layers — what-question + who-writes dual lens),
 3 (skills / progressive disclosure — token + cache economics),
 4 (protocols — deterministic enforcement, architectural claim vs. advisory),
-and 5 (tools — review surface, `--rationale` as generalizability filter,
-discovered-vs-declared test) via Socratic Q&A in Claude Code. Modules 6–7
-remain TODO. v0.8.0 baseline merged from upstream; D1/D2/D3 locked (single
-fork + gitignored `memory/client/<id>/`; hybrid core + `adapters/bcg/`; all
-four deliverables — Phase 3 non-optional). Also surveyed gstack ≥ v1.0.0.0
-— bootstrap-target note added to plan, convergence on host-adapter pattern
-noted as architectural validation.
+5 (tools — review surface, `--rationale` as generalizability filter,
+discovered-vs-declared test), and 6 (harness — Claude Code IS the conductor;
+one hook-wire-point as the composability surface) via Socratic Q&A in Claude
+Code. Feedback-loops section remains TODO. v0.8.0 baseline merged from
+upstream; D1/D2/D3 locked (single fork + gitignored `memory/client/<id>/`;
+hybrid core + `adapters/bcg/`; all four deliverables — Phase 3 non-optional).
+Also surveyed gstack ≥ v1.0.0.0 — bootstrap-target note added to plan,
+convergence on host-adapter pattern (Hermes + GBrain hosts, brain-first
+resolver) noted as architectural validation.
 
 ### [future entries]
 - When something above is wrong, rewrite the compiled-truth section and add
