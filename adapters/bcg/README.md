@@ -22,9 +22,31 @@ adapters/bcg/
 │   ├── glossary/      # Consulting terminology
 │   └── industries/    # Industry context modules (consumer-goods, financial-services, ...)
 ├── personas/          # BCG-specific reviewer style overlays (partner archetypes)
+├── agents/            # BCG consulting program roster — program/case execution roles
+│                      # (distinct from adapters/claude-code/agents/ which holds SDLC roles)
 ├── skills/            # BCG-skinned skills (e.g. confluence-access)
 └── mcp/               # BCG MCP server configuration pointers
 ```
+
+## Agent rosters: BCG consulting vs. SDLC
+
+Two disjoint agent rosters coexist in the installed target's `.claude/agents/`:
+
+| Roster | Home | Roles | Example |
+|---|---|---|---|
+| SDLC (harness-level) | `adapters/claude-code/agents/` | product-manager, architect, engineer, reviewer, release-manager | Build software |
+| BCG consulting | `adapters/bcg/agents/` | program-director, program-manager, program-architect, engineering-lead, analyst, sme, executive-sponsor, … | Run a BCG engagement |
+
+The SDLC roster is always installed. The BCG roster is installed only when
+`.agent/config.json` has `"bcg_adapter": "enabled"` (install.sh reads this
+flag and conditionally copies `adapters/bcg/agents/*.md` alongside
+adapters/bcg/commands/*.md into the target's `.claude/` dirs).
+
+Name collisions are resolved at import time. The starter-kit's `architect`
+(program-scale — technology stack, standards, build-vs-buy) was renamed to
+`program-architect` on import to avoid clashing with the SDLC
+`architect` (PRD→ADR for a single feature). Prose references to
+"Architect" in peer BCG agents were updated to "Program Architect".
 
 ## What lives here vs. `.agent/`
 
