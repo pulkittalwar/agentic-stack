@@ -55,3 +55,28 @@ Smoke-test verified: `./install.sh claude-code examples/pdlc-sandbox --yes` prod
 **Alternatives considered:** (a) Skip 8.0 entirely and jump to the Step 8.1 import from harness-starter-kit — rejected because install.sh was broken (no agent propagation); would have compounded two failure modes at once. (b) Pack 8.0 into a single mega-commit — rejected per `artifact-and-git-cadence` preference for frequent atomic commits + per-approval cadence. (c) Enable BCG adapter by default in the tracked `config.json` — rejected because the fork is a public scaffold shareable with non-BCG users; disabled-by-default + explicit flip on the working-project install keeps the fork generic.
 
 **Status:** active
+
+## 2026-04-24: Step 8.1 — classified import from harness-starter-kit
+**Decision:** Import Kenneth Leung's `harness-starter-kit` (BCG) into the agent-stack repo in seven atomic commits, classifying each artifact at the BCG-private / generic boundary per the D2 hybrid-adapter model:
+
+**BCG-private** (→ `adapters/bcg/`, loaded only when `config.json.bcg_adapter = "enabled"`):
+- Scripts: `sync-confluence.py`
+- Templates: `config.yaml`, `.env.example`, `meeting-notes-template.md`, `weekly-status-template.md`
+- Protocols: `atlassian-rules.md` (IP-allowlist workaround + BCG-specific API ID rules)
+- Commands: `/sync-harness` (two-path Confluence sync)
+- Context: `bcg-firm-context.md`, `case-engagement-process.md`, `bcg-core-frameworks.md`, `consulting-glossary.md`
+- BCG-skinned skill: `confluence-access` (bcgx.atlassian.net / BCTAH / Rovo Graph Gateway protocol)
+
+**Generic** (→ `.agent/`, shareable across firms and engagements, bootstrapped verbatim with new `bootstrapped_from:` frontmatter field):
+- Skills: `analysis`, `review`, `document-assembly`, `context-search` → `.agent/skills/` under new `category: knowledge-work`
+- Workflows: `situation-assessment`, `issue-tree-hypothesis`, `mid-case-findings-deck`, `final-recommendations-deck`, `post-meeting-update`, `daily-task-tracking` → new dir `.agent/workflows/`; `sample-` prefix dropped because these are canonical in our repo, not examples
+
+**Deferred to Step 8.2** (agent-tuning): starter-kit's `.claude/agents/` roster (12 consulting roles — analyst, architect, business-lead, …) and `.claude/agent-memory/`. Blind import would have collided with the existing `adapters/claude-code/agents/` SDLC roster (product-manager, engineer, architect, reviewer, release-manager); tuning needs to reconcile name clashes and decide which to keep as distinct agents vs. fold in. The `formatting.md` rule, `draft-status-update` skill, starter-kit personas, specs, and project-scoped context samples were also deferred — none were in the user-approved 8.1 scope.
+
+**Rationale:** The BCG-vs-generic split is the crux of the adapter model — getting it right now avoids retroactive reclassification later. Content was classified on two concrete signals: (a) does it reference BCG-specific infrastructure (bcgx.atlassian.net, BCTAH space, `@bcg.com` accounts, IP allowlist) — if yes, private; (b) is the pattern transferable to a non-BCG consulting engagement without edits — if yes, generic. Skills `analysis`/`review`/`document-assembly`/`context-search` passed (b) despite originating at BCG; `confluence-access` failed (a) because it hard-codes the BCG Atlassian org's behavior. The `bootstrapped_from:` frontmatter field (new optional field, added to `.agent/skills/_manifest.jsonl`) preserves provenance so future drift between the bootstrapped copy and the upstream source stays traceable.
+
+Verbatim-first import (no path adaptation) was chosen for `context-search` despite its references to paths (`context/projects/{project}/`, `context/account/frameworks/`) that don't exist in agent-stack's layout. The `bootstrapped_from:` marker and an explicit note in the skill's description signal "adapt in Step 8.2" — keeping 8.1 a mechanical classification commit rather than mixing in edits.
+
+**Alternatives considered:** (a) Import as one mega-commit — rejected per `artifact-and-git-cadence` and to keep the boundary auditable per-artifact. (b) Rewrite `context-search` paths immediately during import — rejected; mixes classification with adaptation and makes diff review harder. (c) Leave `confluence-access` under `.agent/skills/` and note it's BCG-flavored — rejected; the file hard-codes bcgx.atlassian.net, BCTAH, and the BCG IP-allowlist protocol, so it can't load on a non-BCG install without failing loudly. (d) Import the starter-kit's full consulting agent roster now — rejected; would collide with the existing SDLC roster and commit us to an unreviewed naming scheme before 8.2 agent-tuning.
+
+**Status:** active
