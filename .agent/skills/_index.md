@@ -92,3 +92,41 @@ with breaking-change upgrade paths and semver-grounded version bump.
 Triggers: "write release notes", "update the changelog", "what changed"
 Constraints: no misc-fixes bucket; every entry traces to a commit/PR;
 breaking changes carry explicit upgrade path.
+
+---
+
+Knowledge-work skills below are bootstrapped from the harness-starter-kit
+(Kenneth Leung, BCG) in Step 8.1. They are imported verbatim with minimal
+frontmatter; path references and triggers will be adapted to agent-stack
+conventions in Step 8.2.
+
+## analysis (knowledge-work)
+Structured analytical work on case/engagement questions — sizing,
+benchmarking, driver decomposition, scenario analysis, feasibility.
+Triggers: "analyze this", "market sizing", "what drives", "is this feasible"
+Constraints: every finding has So-What + confidence; assumptions explicit;
+top-2–3 sensitivity drivers surfaced.
+
+## review (knowledge-work)
+Reviews narrative/analytical deliverables (decks, memos, status updates)
+and produces a verdict (approved/revise/reject) with severity-graded
+findings. Distinct from code-reviewer, which reviews diffs.
+Triggers: "review this deliverable", "verdict on", "partner review"
+Constraints: never produces content; every finding cites a location;
+one issue per entry.
+
+## document-assembly (knowledge-work)
+Mechanical assembly of section drafts into a final deliverable —
+section-completeness check, canonical ordering, coherence pass, ToC,
+metadata, placeholder flagging.
+Triggers: "assemble document", "compile the deck", "merge section drafts"
+Constraints: no new content invented; gaps flagged as [PLACEHOLDER: ...];
+source drafts tracked in trailing block.
+
+## context-search (knowledge-work)
+Retrieves structured project context (client facts, decisions, constraints,
+transcripts, frameworks) before analysis or drafting. Not a substitute for
+memory recall — this searches project context, not agent memory.
+Triggers: "find context on", "what do we know about", "pull the background"
+Constraints: read-only; cite sources explicitly; flag gaps as
+[CONTEXT GAP: ...]; surface contradictions, never resolve silently.
