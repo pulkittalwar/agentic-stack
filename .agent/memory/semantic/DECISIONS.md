@@ -80,3 +80,25 @@ Verbatim-first import (no path adaptation) was chosen for `context-search` despi
 **Alternatives considered:** (a) Import as one mega-commit — rejected per `artifact-and-git-cadence` and to keep the boundary auditable per-artifact. (b) Rewrite `context-search` paths immediately during import — rejected; mixes classification with adaptation and makes diff review harder. (c) Leave `confluence-access` under `.agent/skills/` and note it's BCG-flavored — rejected; the file hard-codes bcgx.atlassian.net, BCTAH, and the BCG IP-allowlist protocol, so it can't load on a non-BCG install without failing loudly. (d) Import the starter-kit's full consulting agent roster now — rejected; would collide with the existing SDLC roster and commit us to an unreviewed naming scheme before 8.2 agent-tuning.
 
 **Status:** active
+
+## 2026-04-24: Step 8.2.1 — BCG consulting agent roster + install.sh conditional branch + formatting rule
+**Decision:** Stage 1 of a three-stage Step 8.2 (Option C from the pre-work scoping). Four atomic commits:
+
+1. Import 13 starter-kit consulting agents into a new `adapters/bcg/agents/` dir. Rename starter-kit `architect.md` → `program-architect.md` to resolve the name collision with the existing SDLC `adapters/claude-code/agents/architect.md` (both would otherwise land in the same `.claude/agents/` dir at install time, and Claude Code dispatches by agent name). Update the renamed file's `name:` frontmatter and self-reference. Renormalize prose refs to `Architect` (as a role noun) in 5 peer BCG agents — engineering-lead, integration-lead, program-director, program-manager, sme — to `Program Architect` via a word-boundary regex, preserving substring matches like "architectural" and "architecture". Document the BCG-vs-SDLC roster split in `adapters/bcg/README.md`.
+
+2. Extend `install.sh` claude-code branch with a BCG-conditional propagation block. Reads source `.agent/config.json` at install time; when `bcg_adapter == "enabled"`, copies `adapters/bcg/agents/*.md` and `adapters/bcg/commands/*.md` into the target's `.claude/agents/` and `.claude/commands/` dirs (alongside the always-propagated SDLC roster). Uses grep with a JSON-aware regex rather than jq to avoid a runtime dependency. Guards empty globs with nullglob so scaffold-only states don't break.
+
+3. Import `.claude/rules/formatting.md` → `adapters/bcg/protocols/formatting.md` (action-item-tracker schema, RAID log schema, fixed status enum, weekly-status section order). Classified BCG-private because the exact enum values and section ordering are a BCG house-style choice, not a universal consulting standard.
+
+4. Smoke-test (two fresh installs into `/tmp/claude/bcg-smoke-{disabled,enabled}/`) verified:
+   - Disabled config → 5 SDLC agents, no BCG content, no `.claude/commands/` dir
+   - Enabled config → 18 agents total (5 SDLC + 13 BCG, no collisions because `architect` ≠ `program-architect`), `.claude/commands/sync-harness.md` present
+   - Source `.agent/config.json` was temporarily flipped to `enabled` for smoke B and reverted before push (tracked default stays `disabled`)
+
+**Rationale:** Agents and slash commands need install-time propagation (Claude Code discovers them by filesystem at launch) whereas context / protocols / templates / skills load at session-start via the CLAUDE.md conditional — so the install.sh change is necessarily asymmetric and has to be a distinct commit. The `architect` → `program-architect` rename is the clean resolution because the two roles are semantically distinct (SDLC architect = PRD→ADR for one feature; program architect = tech-stack + standards across workstreams), merging them would be wrong, and filesystem-level disambiguation beats install-time ordering tricks. Renormalizing prose `Architect` references in peer BCG agents prevents Claude from ambiguating cross-roster when a BCG agent says "reviewed by the Architect" in running text.
+
+Workflow↔roster reconciliation (e.g., `framework-lead`, `case-analyst`, `delivery-lead`, `partner-strategy`, `partner-analytics`, `principal-delivery`, `transcript-analyst`, `io-qa-auditor`, `jira-tracker-analyst` are referenced in imported workflows but absent from the 13-agent roster) is deferred to Step 8.2.2 — that's a design decision requiring a canonical-role verdict, not a mechanical import.
+
+**Alternatives considered:** (a) Leave both `architect` files, rely on install-ordering — rejected because the second `cp` would silently clobber the first and the user would see only one, varying by adapter order. (b) Namespace agents by directory (`.claude/agents/sdlc/`, `.claude/agents/bcg/`) — rejected because Claude Code does not recursively scan subdirectories. (c) Put BCG agents in `adapters/claude-code/agents/` with a prefix — rejected because that dir is the harness-level generic roster; BCG content belongs under `adapters/bcg/`. (d) Add a runtime dependency on `jq` for the install.sh config read — rejected; grep handles the single flag fine and keeps install.sh portable to stripped-down shells.
+
+**Status:** active
