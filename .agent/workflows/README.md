@@ -27,11 +27,22 @@ in this repo these are canonical patterns, not samples.
 
 ## Status
 
-Several workflow definitions reference agent roles (e.g. `framework-lead`,
-`case-analyst`, `partner-strategy`, `transcript-analyst`, `io-qa-auditor`)
-that do not yet exist in `adapters/claude-code/agents/`. Wiring those
-agents and/or renaming role references is scheduled for Step 8.2
-(agent-tuning).
+As of Step 8.2.2, every role reference in every workflow resolves to a
+real agent in either `adapters/claude-code/agents/` (SDLC roster, always
+installed) or `adapters/bcg/agents/` (BCG consulting roster, installed
+only when `.agent/config.json` has `bcg_adapter: "enabled"`).
+
+The reconciliation was hybrid:
+- Three reviewer-lens roles were genuine distinct lenses and were authored
+  as new BCG agents: `partner-strategy`, `partner-analytics`,
+  `principal-delivery`.
+- Six other orphan role labels from the starter-kit workflows were
+  relabeled to canonical roster names: `framework-lead`, `case-analyst`,
+  `transcript-analyst`, `jira-tracker-analyst` → `analyst`;
+  `delivery-lead` → `program-manager`; `io-qa-auditor` → `test-lead`.
+
+See `adapters/bcg/README.md` for the full BCG agent roster and
+`.agent/memory/semantic/DECISIONS.md` for the reconciliation rationale.
 
 ## Conventions
 
