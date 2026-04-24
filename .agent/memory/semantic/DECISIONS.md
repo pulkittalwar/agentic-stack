@@ -153,3 +153,40 @@ Step 8.3 (real-case dry-run) can now execute against a completed roster.
 **Alternatives considered:** (a) Leave context-search paths as starter-kit refs and document the mismatch — rejected; silent-failure surface in a high-use skill. (b) Import draft-status-update to `adapters/bcg/skills/` — rejected; content contract is generic, only the formatting delegate is firm-specific. (c) Skip agent-memory templates entirely (option 3b) — rejected; a populated roster with empty memory scaffolding is a worse UX than a populated roster with 3-line init stubs. (d) Use `cp -R` (overwrite) for agent-memory templates to match the agents/commands propagation pattern — rejected; per-agent memory is the one content type where preservation across re-installs is load-bearing. (e) Import personas to `adapters/bcg/personas/` per my initial plan — rejected after checking content; both samples are firm-generic, and the BCG-personas README explicitly says firm-generic archetypes belong in `.agent/personas/`. The gitignore in `adapters/bcg/personas/` would also have silently dropped them.
 
 **Status:** active
+
+## 2026-04-24: Step 8.2.4 — reclassify consulting frameworks + glossary + quality standards as firm-generic
+**Decision:** Re-examined the 8.1 BCG-private classification of `adapters/bcg/context/{firm,frameworks,glossary}/` after user noted the frameworks and glossary are useful in personal projects, not only BCG engagements. Reading the actual content confirmed the content was mixed, not uniformly BCG-proprietary. Re-split along content lines:
+
+**Moved to `.agent/context/` (firm-generic, always-loaded):**
+- `glossary.md` — consulting terminology (MECE, Pyramid, Ghost Deck, RAID, Workstream, So What, Straw Man, …). Content is Minto/Porter/generic MBB vocabulary; the previous "BCG / Consulting Terms" header overclaimed. Renamed to "Core Terms".
+- `frameworks.md` — Issue Tree, Pyramid Principle (Minto), MECE, 7-S (McKinsey), Value Chain (Porter), Driver Tree, Sensitivity Analysis, Market Sizing (top-down / bottom-up), Pricing Strategy taxonomy. ~80% of the previous BCG-core-frameworks file. All firm-generic.
+- `quality-standards.md` — authored new, extracting the generic portions of the BCG firm-context "Quality Standards" section: so-what-first (Pyramid), MECE analytical completeness, evidenced claims + explicit assumptions, sensitivity transparency. Added failure modes for each and a 5-item ready-for-review checklist.
+
+**Kept in `adapters/bcg/context/` (BCG-specific, adapter-only):**
+- `frameworks/bcg-matrix.md` — authored new from the ~15 BCG-attributed lines of the previous frameworks file: Growth-Share Matrix (developed by BCG 1970) and BCG's pricing-practice opinion (value-based-first sequencing).
+- `firm/bcg-firm-context.md` — BCG hierarchy, team sizing (2–6 consultants), BCG engagement duration (6–12 weeks), BCG title conventions (Partner/MD, Principal/AD, Project Leader, Consultant, Associate), BCG tools (Confluence, PowerPoint). The "Quality Standards" section now references the generic file and retains only the BCG-specific "Ready-for-client = Partner approval" gate, framed as "generic standards are necessary but not sufficient" to make the layering explicit.
+- `firm/case-engagement-process.md` — unchanged; BCG-specific.
+
+**CLAUDE.md session-start** rewritten with two layers: step 7 unconditionally loads `.agent/context/` (three files) on every session; the conditional-mount block now loads `adapters/bcg/context/firm/` and `adapters/bcg/context/frameworks/` *on top of* the generic base when `bcg_adapter: "enabled"`. Glossary removed from the conditional list since it's always-loaded now.
+
+Smoke-test verified on fresh targets in `/tmp/claude/824-{disabled,enabled}/`:
+- Disabled config: `.agent/context/` with all 4 files present (README + 3 content), 5 SDLC agents, no `.claude/commands/`, no `.claude/agent-memory/` — generic consulting context reaches personal-project installs exactly as intended
+- Enabled config: same `.agent/context/` plus 21 agents (5+16), 1 BCG slash command, 16 BCG memory stubs — firm-specific content layers on top
+- Source `config.json` was flipped to `"enabled"` for smoke B and reverted before push
+
+**Rationale:** The 8.1 classification put MECE, Pyramid Principle, 7-S, Value Chain, Driver Tree, and consulting glossary terms under `adapters/bcg/` — treating Minto's and Porter's industry-standard frameworks as BCG-proprietary. That was wrong on the merits (the frameworks are industry canon) and wrong on the UX (the generic fork shipped without access to MECE/pyramid guidance unless the BCG adapter was toggled on, which requires BCG-specific Atlassian infrastructure). Splitting along the real content line — generic consulting knowledge vs. BCG-authored content — makes the generic fork useful as a consulting-savvy agent stack independent of BCG, and keeps the BCG adapter honest about what is actually BCG's.
+
+The quality-standards extraction was user-flagged explicitly ("the rigor and so-what level which the bcg firm dir tells about the quality of the work"). The extraction isolates the four generic demands from the one BCG-specific gate (Partner approval as the client-readiness trigger), so both layers stay intact and composable.
+
+**Alternatives considered:** (a) Move all three files (firm-context included) to `.agent/context/` — rejected; `bcg-firm-context.md` is ~95% BCG-specific content (hierarchy titles, team sizing norms, tool choices), shipping it generically would make the public fork look BCG-branded without benefit. (b) Duplicate generic portions into `.agent/context/` and leave originals intact in `adapters/bcg/` — rejected; drift risk over time, and the classification would stay wrong. (c) Keep current classification and have personal projects enable the BCG adapter just for context — rejected; enabling the adapter pulls in Atlassian protocol, sync-harness command, and confluence-access skill, all of which fail on non-BCG infrastructure. Enabling-for-context-only would require a finer-grained toggle per sub-adapter, which is over-engineering.
+
+Final roster state after Step 8.2 (8.2.1 + 8.2.2 + 8.2.3 + 8.2.4):
+- **Agents:** 5 SDLC (always) + 16 BCG (adapter-gated) = 21
+- **Skills:** 11 SDLC + 5 knowledge-work (analysis, review, document-assembly, context-search, draft-status-update) + 1 BCG-skinned (confluence-access) = 17
+- **Workflows:** 6 canonical in `.agent/workflows/`, every role ref resolves
+- **Personas:** 2 firm-generic in `.agent/personas/`
+- **Agent-memory templates:** 16 per-role stubs in `adapters/bcg/agent-memory-templates/`, install-propagated with preservation
+- **Generic context:** 3 always-on files in `.agent/context/` (glossary, frameworks, quality-standards)
+- **BCG adapter context:** `firm/` (BCG-specific hierarchy + engagement model) + `frameworks/` (BCG Matrix + pricing opinion)
+
+**Status:** active
