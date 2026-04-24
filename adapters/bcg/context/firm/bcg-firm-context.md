@@ -24,10 +24,17 @@ Boston Consulting Group (BCG) is a global management consulting firm. Engagement
 | Associate | Analysis execution, model building, slide production |
 
 ## Quality Standards
-- Pyramid principle: leading with the "so what" in all communications
-- MECE structure in all frameworks and analyses
-- All claims must be evidenced or flagged as assumptions
-- "Ready for client" = partner has reviewed and approved
+
+Generic consulting quality standards (so-what-first, MECE discipline,
+evidenced claims, sensitivity transparency) live in
+`.agent/context/quality-standards.md` and apply to all analytical work,
+not just BCG engagements.
+
+BCG-specific gate on top of those:
+- **"Ready for client" = Partner has reviewed and approved.** No deliverable
+  leaves the team for a client meeting without Partner sign-off. This is
+  BCG-specific — generic quality standards are necessary but not sufficient
+  for BCG client-readiness.
 
 ## Tools
 - Confluence: internal knowledge management, case documentation
