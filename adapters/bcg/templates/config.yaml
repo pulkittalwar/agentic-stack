@@ -1,0 +1,24 @@
+# ============================================================
+# Environment Configuration
+# ============================================================
+
+# --- Confluence ---
+confluence:
+  site_url: https://bcgx.atlassian.net
+  space_key: BCTAH
+  space_id: "2938077250"
+  homepage_id: "2938077902"
+  cloud_id: "2436163d-7967-483c-93a6-bb953a1adbef"
+
+
+# --- Telemetry (disabled) ---
+# To enable, copy these into .claude/settings.json under "env":
+# telemetry:
+#   CLAUDE_CODE_ENABLE_TELEMETRY: "1"
+#   OTEL_METRICS_EXPORTER: otlp           # Options: otlp, prometheus, console
+#   OTEL_LOGS_EXPORTER: otlp              # Options: otlp, console
+#   OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+#   OTEL_EXPORTER_OTLP_ENDPOINT: http://localhost:4317
+#   OTEL_EXPORTER_OTLP_HEADERS: "Authorization=Bearer your-token"
+#   OTEL_METRIC_EXPORT_INTERVAL: "10000"  # 10s (default: 60s)
+#   OTEL_LOGS_EXPORT_INTERVAL: "5000"     # 5s (default: 5s)
