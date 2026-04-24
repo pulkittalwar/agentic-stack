@@ -10,18 +10,29 @@ and protocols live in `.agent/`.
 4. `.agent/memory/working/REVIEW_QUEUE.md` — pending lessons awaiting review
 5. `.agent/memory/semantic/LESSONS.md` — what we've already learned
 6. `.agent/protocols/permissions.md` — hard constraints, read before any tool call
+7. `.agent/context/` — firm-generic consulting context (always-on, not
+   adapter-gated). Three files: `glossary.md` (consulting terminology),
+   `frameworks.md` (Issue Tree / Pyramid / MECE / 7-S / Value Chain / Driver
+   Tree / Sensitivity / Market Sizing / Pricing taxonomy), and
+   `quality-standards.md` (so-what-first / MECE discipline / evidenced
+   claims / sensitivity transparency). Apply these standards and vocabulary
+   to any analytical task, including personal projects — they are not
+   BCG-proprietary.
 
 ### Conditional mounts (based on `config.json`)
 
 After reading `config.json`, extend the session-start load set as follows:
 
-- If `bcg_adapter == "enabled"`, also read:
+- If `bcg_adapter == "enabled"`, also read (on top of `.agent/context/`):
   - `adapters/bcg/README.md` — adapter map
   - `adapters/bcg/protocols/` — BCG protocol overlays (Atlassian safety,
-    data classification)
-  - `adapters/bcg/context/firm/` — BCG hierarchy + engagement model
-  - `adapters/bcg/context/frameworks/` — BCG analytical canon
-  - `adapters/bcg/context/glossary/` — consulting terminology
+    formatting conventions, data classification)
+  - `adapters/bcg/context/firm/` — BCG hierarchy + engagement model +
+    BCG-specific "ready-for-client = Partner approval" gate on top of
+    the generic quality standards already loaded from `.agent/context/`
+  - `adapters/bcg/context/frameworks/` — BCG-attributed frameworks
+    (Growth-Share Matrix, BCG pricing-practice opinion) on top of the
+    generic frameworks loaded from `.agent/context/`
   - BCG-specific slash commands in `adapters/bcg/commands/` become
     available (e.g. `/sync-harness`).
 
@@ -35,8 +46,9 @@ After reading `config.json`, extend the session-start load set as follows:
     takes precedence over generic BCG context for anything the two
     disagree on.
 
-Until Step 8.1 populates the adapter subdirectories, the conditional mount
-is a no-op — `config.json` defaults to `"bcg_adapter": "disabled"`.
+Generic `.agent/context/` always loads, even when `bcg_adapter: "disabled"`
+— consulting frameworks and quality standards apply to personal projects
+too, per Step 8.2.4's reclassification.
 
 ## Before every non-trivial action — recall first
 
