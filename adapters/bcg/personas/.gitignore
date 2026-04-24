@@ -1,0 +1,6 @@
+# BCG-specific personas are internal-only.
+# Track only README.md and _template.md; ignore every real persona file.
+
+*.md
+!README.md
+!_template.md
