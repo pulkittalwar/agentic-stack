@@ -18,6 +18,8 @@ venv/
 
 # Claude Code per-user local settings (never committed)
 .claude/settings.local.json
+.claude/scheduled_tasks.json
+.claude/scheduled_tasks.lock
 
 # runtime logs
 .agent/memory/dream.log
