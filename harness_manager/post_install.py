@@ -360,7 +360,13 @@ def take_install_snapshot(
     is non-fatal (status='snapshot_failed') because a missing snapshot
     only affects later diff visibility, not install correctness.
     """
-    target_root = Path(target_root)
+    # Resolve to absolute so the subprocess's cwd doesn't double-up the
+    # path. With a relative target_root like 'examples/pdlc-sandbox',
+    # passing a relative snapshot_tool path AND cwd=target_root makes
+    # Python re-resolve the path against target_root, producing
+    # 'examples/pdlc-sandbox/examples/pdlc-sandbox/...' which doesn't
+    # exist. Absolute resolution sidesteps the issue.
+    target_root = Path(target_root).resolve()
     snapshot_tool = target_root / ".agent" / "tools" / "snapshot_diff.py"
 
     if not snapshot_tool.is_file():
@@ -373,7 +379,7 @@ def take_install_snapshot(
     try:
         result = subprocess.run(
             ["python3", str(snapshot_tool), "--snapshot"],
-            cwd=target_root,
+            cwd=str(target_root),
             capture_output=True,
             text=True,
             timeout=30,
