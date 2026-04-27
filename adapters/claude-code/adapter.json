@@ -13,6 +13,31 @@
       "dst": ".claude/settings.json",
       "merge_policy": "overwrite",
       "substitute": true
+    },
+    {
+      "src": "agents/architect.md",
+      "dst": ".claude/agents/architect.md",
+      "merge_policy": "overwrite"
+    },
+    {
+      "src": "agents/engineer.md",
+      "dst": ".claude/agents/engineer.md",
+      "merge_policy": "overwrite"
+    },
+    {
+      "src": "agents/product-manager.md",
+      "dst": ".claude/agents/product-manager.md",
+      "merge_policy": "overwrite"
+    },
+    {
+      "src": "agents/release-manager.md",
+      "dst": ".claude/agents/release-manager.md",
+      "merge_policy": "overwrite"
+    },
+    {
+      "src": "agents/reviewer.md",
+      "dst": ".claude/agents/reviewer.md",
+      "merge_policy": "overwrite"
     }
   ]
 }

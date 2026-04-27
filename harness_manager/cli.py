@@ -4,6 +4,8 @@ Verbs (subcommands): add, remove, doctor, status.
 Anything else in first position → treated as an adapter name (existing
 `./install.sh <adapter>` UX preserved).
 """
+from __future__ import annotations
+
 import argparse
 import os
 import subprocess
