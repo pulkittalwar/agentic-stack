@@ -306,6 +306,8 @@ def install(
             log(f"    ✓ {action_name} ok")
         elif status == "already_exists":
             log(f"    ✓ {action_name} idempotent (already present)")
+        elif status == "disabled":
+            log(f"    ✓ {action_name} skipped (disabled in config)")
         elif status == "binary_missing":
             log(f"    ! {action_name}: binary missing")
             hint = result.get("fallback_hint")
