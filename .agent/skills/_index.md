@@ -171,3 +171,22 @@ Section order follows firm adapter's formatting conventions
 Triggers: "draft weekly status", "this week's update", "weekly status draft"
 Constraints: never publish directly; executive summary partner-readable
 in 30 seconds; wins first, then risks; specificity over vagueness.
+
+## client-onboarding (engagement-setup)
+Bootstraps a new engagement: confirms slug, scaffolds
+`.agent/memory/client/<slug>/` from `_template/`, sets `active_client`
+in `config.json`, initializes `INDEX.md`, and prompts the user to drop
+briefing files into `raw-uploads/` for `document-researcher` to summarize.
+Never auto-loads raw uploads — INDEX.md is the only eager surface.
+Triggers: "new engagement", "start client", "onboard client", "set up engagement"
+Constraints: never overwrite existing client/<id>/INDEX.md silently;
+never load raw uploads into context.
+
+## document-researcher (engagement-setup)
+Summarizes a single document dropped into a client's `raw-uploads/`,
+demanding a one-line user description first. Produces a bounded summary
+at `summaries/<filename>.md` and appends a Documents-table row to the
+client's `INDEX.md`. Drives the lazy-load pattern.
+Triggers: "summarize this document", "researcher", "index this upload"
+Constraints: mandatory user description; bounded summary length;
+never auto-load raw upload content into broader session context.
