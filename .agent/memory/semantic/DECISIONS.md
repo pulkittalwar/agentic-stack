@@ -190,3 +190,34 @@ Final roster state after Step 8.2 (8.2.1 + 8.2.2 + 8.2.3 + 8.2.4):
 - **BCG adapter context:** `firm/` (BCG-specific hierarchy + engagement model) + `frameworks/` (BCG Matrix + pricing opinion)
 
 **Status:** active
+
+## 2026-04-27: Step 8.2.5 — sync fork to upstream v0.11.2 + port BCG to harness_manager
+
+**Decision:** Synced agent-stack fork from base v0.8.0 (`a397568`) to upstream v0.11.2 (`8ba0293`) — 59 commits, 6 tags. Three-way merge with 4 conflict resolutions:
+
+- `install.sh`: took upstream (38-line Python dispatcher) — discarded our 175-line bash with the BCG-conditional propagation block. Block re-introduced as new named post_install action `bcg_conditional_propagate` in `harness_manager/post_install.py`, registered in `harness_manager/schema.py`, wired into `adapters/claude-code/adapter.json`.
+- `.agent/skills/_index.md`, `.agent/skills/_manifest.jsonl`: union merge — disjoint skill names (ours' 13 knowledge-work + SDLC + theirs' 3 new: data-flywheel, data-layer, design-md). Inserted theirs' 3 entries between deploy-checklist and planner sections.
+- `.agent/memory/semantic/DECISIONS.md`: ours-wins (project history).
+- Auto-merged: `.agent/AGENTS.md`, `.gitignore`.
+
+**Architecture preserved:** harness_manager's named-built-in post_install model (codex review flagged DSL creep; named built-ins are the constrained alternative). Extended `post_install.run()` and `post_install.reverse()` to pass `stack_root` via kwargs — non-invasive change because all action functions absorb extra kwargs via `**_kwargs`. BCG action reads source-tree `adapters/bcg/` content because adapter manifests don't ship that content into target's copied `.agent/`. Threaded stack_root through `remove()` signature too so reverse cleanup works on uninstall.
+
+**Behaviour preserved from bash:** agents/commands overwrite-on-install; agent-memory templates copy-if-missing (preserves user-seeded per-agent memory); README.md excluded from agent-memory propagation; gated on source `.agent/config.json` `bcg_adapter == "enabled"`.
+
+**Two upstream regressions discovered + fixed locally** (commit `20e37fc`, candidates to upstream codejunkie99/agentic-stack):
+1. `harness_manager/cli.py` uses PEP 604 union syntax (`list[str] | None`) without `from __future__ import annotations` — fails import on Python 3.9.6. The v0.10.0 commit `f0cd73b` "support Python 3.9" added the future import to other harness_manager modules but missed cli.py.
+2. `adapters/claude-code/adapter.json` only declared CLAUDE.md + settings.json. The pre-v0.9.0 install.sh did `cp agents/*.md .claude/agents/` automatically; the manifest-driven refactor lost this. Added 5 explicit `files` entries for SDLC agents (architect, engineer, product-manager, release-manager, reviewer).
+
+**Gained from upstream:** harness_manager Python pkg (cli, doctor, install, manage_tui, post_install, remove, schema, state, status), data-layer + data-flywheel + design-md skills, codex adapter, pi adapter rewrite (closes formula crash + decay tz bug per #24), schemas/, top-level test files (test_data_flywheel_export.py, test_data_layer_export.py), new hooks (_episodic_io.py, pi_post_tool.py, _provenance.py, claude_code_post_tool.py, pre_tool_call.py), Windows path-traversal security fix.
+
+**Kept untouched (~92 files):** all of `adapters/bcg/` (16 agents, 16 agent-memory templates, scripts, commands, protocols, context, templates, skills), `.agent/context/` (4 generic-consulting files from 8.2.4), `.agent/personas/` (executive-sponsor, program-director from 8.2.3), all 13 knowledge-work + SDLC skill dirs.
+
+**Smoke-tested via `./install.sh`:** both adapter states on fresh installs in `/tmp/claude-501/825-{disabled,enabled}/`. Disabled → 5 SDLC agents, 0 commands, 0 agent-memory, generic context loaded. Enabled → 21 agents (5+16), 1 BCG slash command (sync-harness.md), 16 BCG agent-memory stubs. Idempotence verified separately: user-seeded MARKER line preserved across re-install.
+
+**Rationale:** v0.9.0's harness_manager refactor is the architectural change that mattered most — install.sh became a thin dispatcher, real logic moved to a manifest-driven Python pkg with named built-in post_install actions. Re-extending the bash with our BCG block and ignoring the new pkg would have stranded us on a deprecated install path that brew formula no longer invokes. Porting to a named post_install action keeps us inside the upstream architecture, makes the BCG conditional reviewable by upstream (if we ever upstream the adapter), and is testable in isolation.
+
+**Alternatives considered:** (a) Cherry-pick selected upstream commits — rejected; the harness_manager refactor is too coupled to its supporting commits to cherry-pick cleanly. (b) Rebase our 8.x onto upstream — rejected; conflict surface identical, but rewrites our publicly-visible 8.x history. (c) Generalize a `firm_overlay` mechanism in harness_manager — rejected as YAGNI; one named action is right-sized for one firm adapter. Refactor when a second firm appears. (d) Move BCG content into `.agent/firms/bcg/` so it gets copied as part of `.agent/` and the action only needs target_root — rejected; breaks the firm-adapter pattern established in Step 8.0 and would require restructuring the entire `adapters/bcg/` tree. Passing stack_root via kwargs is a one-line change with a much smaller blast radius.
+
+**Status:** active
+
+**Operationalized:** weekly upstream-sync cadence (Mon 9:13 local, durable cron `ba87d58c` + auto-memory `upstream_sync_cadence.md`) so this drift doesn't recur. Plan + per-tag classification doc checked into `docs/superpowers/plans/`. Test file at top-level (`test_bcg_conditional_propagate.py`) matching upstream pattern (test_data_flywheel_export.py); `tests/` is gitignored as of upstream's v0.9.1 (f1c362d).
