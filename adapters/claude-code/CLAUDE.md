@@ -41,10 +41,25 @@ After reading `config.json`, extend the session-start load set as follows:
   with "this is BCG." If a task is explicitly non-BCG (OSS, personal
   side-project), the user will say so.
 
-- If `active_client` is non-null, also read:
-  - `.agent/memory/client/<active_client>/` — engagement-scoped context
-    takes precedence over generic BCG context for anything the two
-    disagree on.
+- If `active_client` is non-null, read **only**:
+  - `.agent/memory/client/<active_client>/INDEX.md` — eager surface,
+    map of what's in this engagement
+  - `.agent/memory/client/<active_client>/briefing.md` — if present,
+    short engagement one-pager
+
+  Do NOT bulk-read the rest of `.agent/memory/client/<active_client>/`
+  at session start. `summaries/<f>.md`, `raw-uploads/<f>`, and the
+  per-client `working/` / `episodic/` / `semantic/` layers all load
+  on-demand only, when the current task needs them. Same
+  progressive-disclosure pattern as `.agent/skills/_index.md`
+  → individual `SKILL.md` files.
+
+  Engagement-scoped context still takes precedence over generic BCG
+  context for anything the two disagree on — INDEX.md is the
+  authoritative pointer to where to look.
+
+  To onboard a new engagement, dispatch the `client-onboarding`
+  skill (triggers: "new engagement", "start client").
 
 Generic `.agent/context/` always loads, even when `bcg_adapter: "disabled"`
 — consulting frameworks and quality standards apply to personal projects
