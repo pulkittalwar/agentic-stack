@@ -154,10 +154,36 @@ python3 .agent/tools/memory_reflect.py \
 | 5–6 | Refactor, significant bug fix, API contract change |
 | 3–4 | Routine edit, file creation, test run |
 
+## Proposing a harness fix from inside an install
+
+If you encounter a bug in a harness-territory file (an agent prompt, a
+skill, a protocol, CLAUDE.md, settings.json), do **not** try to edit it
+directly — those paths are write-protected on installs. Instead capture
+the proposal:
+
+```bash
+python3 .agent/tools/propose_harness_fix.py \
+    --target adapters/claude-code/agents/architect.md \
+    --reason "<one or two sentences on what's wrong>" \
+    --change "<concrete proposed change>" \
+    --severity 7
+```
+
+The proposal lands in `.agent/memory/working/HARNESS_FEEDBACK.md`. Keep
+working on the current task; the proposal is reviewed and graduated to
+the fork (`agent-stack/`) in a separate ritual.
+
+Use this same mechanism when `skill_evolution_mode: "propose_only"` and
+a per-skill self-rewrite hook fires.
+
 ## Rules that override all defaults
 - Never force push to `main`, `production`, or `staging`.
 - Never delete episodic or semantic memory entries — archive them.
 - Never modify `.agent/protocols/permissions.md` — only humans edit it.
 - Never hand-edit `.agent/memory/semantic/LESSONS.md` — use `graduate.py`.
+- Do not edit harness-territory files in installs (CLAUDE.md,
+  `.claude/agents/*`, `.agent/harness/*`, settings.json,
+  `.agent/AGENTS.md`, `.agent/protocols/permissions.md`) — use
+  `propose_harness_fix.py` instead.
 - If `REVIEW_QUEUE.md` shows pending > 10 or oldest > 7 days, review
   candidates before starting substantive work.
